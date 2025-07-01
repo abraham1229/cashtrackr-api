@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express'
+import { request, type Request, type Response } from 'express'
 import Budget from '../models/Budget'
 
 export class BudgetController {
@@ -26,7 +26,19 @@ export class BudgetController {
     }
   }
   static getById = async (req: Request, res: Response) => {
-    console.log('By id desde get /api/budgets')
+    try {
+      const { id } = req.params
+      const budget = await Budget.findByPk(id)
+
+      if (!budget) {
+        const error = new Error('Budget not found')
+        return res.status(404).json({error: error.message})
+      }
+
+      res.json(budget)
+    } catch {
+      res.status(500).json({error: 'Unexpected error'})
+    }
   }
   static updateById = async (req: Request, res: Response) => {
     console.log('By id desde update /api/budgets')
