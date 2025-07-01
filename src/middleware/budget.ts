@@ -14,7 +14,7 @@ export const validateBudgetId = async (req: Request, res: Response, next: NextFu
   await param('id').isInt().withMessage('ID must be an integer')
     .custom(value => value > 0).withMessage('ID must be greater than zero')
     .run(req)
-  
+
   let errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() })
@@ -29,14 +29,14 @@ export const validateBudgetExists = async (req: Request, res: Response, next: Ne
 
     if (!budget) {
       const error = new Error('Budget not found')
-      return res.status(404).json({error: error.message})
+      return res.status(404).json({ error: error.message })
     }
 
     req.budget = budget
 
     next()
   } catch {
-    res.status(500).json({error: 'Unexpected error'})
+    res.status(500).json({ error: 'Unexpected error' })
   }
 }
 

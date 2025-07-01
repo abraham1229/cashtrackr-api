@@ -10,10 +10,10 @@ export class BudgetController {
         ],
         //TODO: filter by authenticats user
       })
-      
+
       res.json(budgets)
     } catch {
-      res.status(500).json({error: 'Unexpected error'})
+      res.status(500).json({ error: 'Unexpected error' })
     }
   }
 
@@ -23,7 +23,7 @@ export class BudgetController {
       await budget.save()
       res.status(201).json('Budget created')
     } catch {
-      res.status(500).json({error: 'Unexpected error'})
+      res.status(500).json({ error: 'Unexpected error' })
     }
   }
 

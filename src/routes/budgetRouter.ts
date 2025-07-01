@@ -14,12 +14,14 @@ router.post('/',
     .isNumeric().withMessage('Amount must be a number.')
     .custom(value => value > 0).withMessage('Amount must be greater than zero.'),
   handleInputErrors,
-  BudgetController.create)
+  BudgetController.create
+)
 
 router.get('/:id',
-  validateBudgetId,  
+  validateBudgetId,
   validateBudgetExists,
-  BudgetController.getById)
+  BudgetController.getById
+)
 
 router.put('/:id',
   validateBudgetId,
@@ -29,11 +31,13 @@ router.put('/:id',
     .isNumeric().withMessage('Amount must be a number.')
     .custom(value => value > 0).withMessage('Amount must be greater than zero.'),
   handleInputErrors,
-  BudgetController.updateById)
+  BudgetController.updateById
+)
 
 router.delete('/:id',
   validateBudgetId,
   validateBudgetExists,
-  BudgetController.deleteById)
+  BudgetController.deleteById
+)
 
 export default router
