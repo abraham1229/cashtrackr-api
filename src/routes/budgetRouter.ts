@@ -4,16 +4,24 @@ import { BudgetController } from "../controllers/BudgetController";
 import { handleInputErrors } from "../middleware/validation";
 import { validateBudgetExists, validateBudgetId, validateBudgetInput } from "../middleware/budget";
 import { ExpensesController } from "../controllers/ExpenseController";
-import { validatExpenseInput } from "../middleware/expense";
+import { validateExpenseExists, validatExpenseId, validatExpenseInput } from "../middleware/expense";
 
 const router = Router()
 
-//All the middlewares for id
+//Middlewares for id
 router.param('budgetId',validateBudgetId)
 router.param('budgetId', handleInputErrors)
 router.param('budgetId', validateBudgetExists)
 
-router.get('/', BudgetController.getAll)
+//Middlewares for expense
+router.param('expenseId', validatExpenseId)
+router.param('expenseId', handleInputErrors)
+router.param('expenseId', validateExpenseExists)
+
+//Routes for budget
+router.get('/',
+  BudgetController.getAll
+)
 
 router.post('/',
   validateBudgetInput,
@@ -41,8 +49,18 @@ router.post('/:budgetId/expenses',
   handleInputErrors,
   ExpensesController.create
 )
-router.get('/:budgetId/expenses/:expenseId', ExpensesController.getById)
-router.put('/:budgetId/expenses/:expenseId', ExpensesController.updateById)
-router.delete('/:budgetId/expenses/:expenseId', ExpensesController.deleteById)
+router.get('/:budgetId/expenses/:expenseId',
+  ExpensesController.getById
+)
+
+router.put('/:budgetId/expenses/:expenseId',
+  validatExpenseInput,
+  handleInputErrors,
+  ExpensesController.updateById
+)
+
+router.delete('/:budgetId/expenses/:expenseId',
+  ExpensesController.deleteById
+)
 
 export default router
