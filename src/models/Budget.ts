@@ -20,7 +20,7 @@ class Budget extends Model {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
   })
-  declare Expenses: Expense[]
+  declare expenses: Expense[]
 
 }
 
