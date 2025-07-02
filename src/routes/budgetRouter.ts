@@ -2,41 +2,34 @@ import { Router } from "express";
 import { body, param } from "express-validator"
 import { BudgetController } from "../controllers/BudgetController";
 import { handleInputErrors } from "../middleware/validation";
-import { validateBudgetExists, validateBudgetId } from "../middleware/budget";
+import { validateBudgetExists, validateBudgetId, validateBudgetInput } from "../middleware/budget";
 
 const router = Router()
+
+//All the middlewares for id
+router.param('budgetId',validateBudgetId)
+router.param('budgetId', handleInputErrors)
+router.param('budgetId', validateBudgetExists)
 
 router.get('/', BudgetController.getAll)
 
 router.post('/',
-  body('name').notEmpty().withMessage('Budget is required.'),
-  body('amount').notEmpty().withMessage('Amount is required.')
-    .isNumeric().withMessage('Amount must be a number.')
-    .custom(value => value > 0).withMessage('Amount must be greater than zero.'),
+  validateBudgetInput,
   handleInputErrors,
   BudgetController.create
 )
 
-router.get('/:id',
-  validateBudgetId,
-  validateBudgetExists,
+router.get('/:budgetId',
   BudgetController.getById
 )
 
-router.put('/:id',
-  validateBudgetId,
-  validateBudgetExists,
-  body('name').notEmpty().withMessage('Budget is required.'),
-  body('amount').notEmpty().withMessage('Amount is required.')
-    .isNumeric().withMessage('Amount must be a number.')
-    .custom(value => value > 0).withMessage('Amount must be greater than zero.'),
+router.put('/:budgetId',
+  validateBudgetInput,
   handleInputErrors,
   BudgetController.updateById
 )
 
-router.delete('/:id',
-  validateBudgetId,
-  validateBudgetExists,
+router.delete('/:budgetId',
   BudgetController.deleteById
 )
 

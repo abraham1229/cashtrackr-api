@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { param, validationResult } from 'express-validator'
+import { body, param } from 'express-validator'
 import Budget from '../models/Budget'
 
 declare global {
@@ -11,21 +11,17 @@ declare global {
 }
 
 export const validateBudgetId = async (req: Request, res: Response, next: NextFunction) => {
-  await param('id').isInt().withMessage('ID must be an integer')
+  await param('budgetId').isInt().withMessage('ID must be an integer')
     .custom(value => value > 0).withMessage('ID must be greater than zero')
     .run(req)
 
-  let errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() })
-  }
   next()
 }
 
 export const validateBudgetExists = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params
-    const budget = await Budget.findByPk(id)
+    const { budgetId } = req.params
+    const budget = await Budget.findByPk(budgetId)
 
     if (!budget) {
       const error = new Error('Budget not found')
@@ -38,5 +34,17 @@ export const validateBudgetExists = async (req: Request, res: Response, next: Ne
   } catch {
     res.status(500).json({ error: 'Unexpected error' })
   }
+}
+
+export const validateBudgetInput = async (req: Request, res: Response, next: NextFunction) => {
+  await body('name').notEmpty().withMessage('Budget is required.')
+    .run(req)
+
+  await body('amount').notEmpty().withMessage('Amount is required.')
+    .isNumeric().withMessage('Amount must be a number.')
+    .custom(value => value > 0).withMessage('Amount must be greater than zero.')
+    .run(req)
+
+  next()
 }
 
