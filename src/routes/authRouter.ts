@@ -36,5 +36,12 @@ router.post('/login',
   AuthController.login
 )
 
+router.post('/forgot-password',
+  body('email')
+    .isEmail().withMessage('Invalid email'),
+  handleInputErrors,
+  AuthController.forgotPassword
+)
+
 
 export default router

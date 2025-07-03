@@ -85,5 +85,35 @@ export class AuthController {
     res.json(token)
     
   }
-  
+
+  static forgotPassword = async (req: Request, res: Response) => {
+    const { email } = req.body
+    
+    //Checks if the use exists
+    const user = await User.findOne({where: {email: email}})
+
+    if (!user) {
+      const error = new Error('User not found')
+      return res.status(404).json({error: error.message})
+    }
+
+    //Check if account is not confirmed
+    if (!user.confirmed) {
+      const error = new Error('Account is not confirmed')
+      return res.status(403).json({error: error.message})
+    }
+
+    //Generate token
+    user.token = generateToken()
+    await user.save()
+
+    //Send email
+    AuthEmail.sendPasswordResetToken({
+      name: user.name,
+      email: user.email,
+      token: user.token
+    })
+
+    res.json('Recovery token sent via email')
+  } 
 }
