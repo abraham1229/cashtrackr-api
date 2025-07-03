@@ -20,11 +20,11 @@ export class ExpensesController {
 
   static updateById = async (req: Request, res: Response) => {
     await req.expense.update(req.body)
-    res.json('Updated succesfully')
+    res.json('Updated successfully')
   }
 
   static deleteById = async (req: Request, res: Response) => {
     await req.expense.destroy()
-    res.json('Deleted succesfully') 
+    res.json('Deleted successfully') 
   }
 }

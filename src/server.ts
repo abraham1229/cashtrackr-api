@@ -9,7 +9,7 @@ async function connectDB() {
   try {
     await db.authenticate()
     db.sync() //Crear tablas y columnas en automatico
-    console.log(colors.blue.bold('Succesfully connected to db'))
+    console.log(colors.blue.bold('Successfully connected to db'))
   } catch (error) {
     // console.log(error)
     console.log(colors.red.bold('Error connecting to db'))
