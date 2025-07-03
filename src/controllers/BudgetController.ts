@@ -1,4 +1,4 @@
-import { request, type Request, type Response } from 'express'
+import { type Request, type Response } from 'express'
 import Budget from '../models/Budget'
 import Expense from '../models/Expense'
 

@@ -8,6 +8,7 @@ import { validateExpenseExists, validatExpenseId, validatExpenseInput } from "..
 
 const router = Router()
 
+/*MIDDLEWARES*/
 //Middlewares for id
 router.param('budgetId',validateBudgetId)
 router.param('budgetId', handleInputErrors)
@@ -18,6 +19,7 @@ router.param('expenseId', validatExpenseId)
 router.param('expenseId', handleInputErrors)
 router.param('expenseId', validateExpenseExists)
 
+/*ROUTES*/
 //Routes for budget
 router.get('/',
   BudgetController.getAll
