@@ -21,11 +21,19 @@ router.post('/create-account',
 )
 
 router.post('/confirm-account',
-  limiter,
   body('token')
     .notEmpty().isLength({min:6, max:6}).withMessage('Token is required'),
   handleInputErrors,
   AuthController.confirmAccount
+)
+
+router.post('/login', 
+  body('email')
+    .isEmail().withMessage('Invalid email'),
+  body('password')
+    .notEmpty().withMessage('Password is required'),
+  handleInputErrors,
+  AuthController.login
 )
 
 
