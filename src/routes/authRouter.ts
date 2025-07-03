@@ -2,9 +2,12 @@ import { Router } from 'express'
 import { AuthController } from '../controllers/AuthController'
 import { body } from 'express-validator'
 import { handleInputErrors } from '../middleware/validation'
+import { limiter } from '../config/limiter'
  
 
 const router = Router()
+
+router.use(limiter) //use groups all the request types
 
 router.post('/create-account',
   body('name')
@@ -18,6 +21,7 @@ router.post('/create-account',
 )
 
 router.post('/confirm-account',
+  limiter,
   body('token')
     .notEmpty().isLength({min:6, max:6}).withMessage('Token is required'),
   handleInputErrors,
