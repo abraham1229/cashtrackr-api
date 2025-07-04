@@ -48,3 +48,13 @@ export const validateBudgetInput = async (req: Request, res: Response, next: Nex
   next()
 }
 
+export const hasAccess = async (req: Request, res: Response, next: NextFunction) => { 
+  const { budget, user } = req
+
+  if (budget.userId !== user.id) {
+    const error = new Error('Not authorized')
+    return res.status(401).json({error: error.message})
+  }
+
+  next()
+}
