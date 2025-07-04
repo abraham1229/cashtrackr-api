@@ -116,4 +116,35 @@ export class AuthController {
 
     res.json('Recovery token sent via email')
   } 
+
+  static validateToken = async (req: Request, res: Response) => {
+    const { token } = req.body
+
+    const tokenExists = await User.findOne({ where: { token: token } })
+    if (!tokenExists) {
+      const error = Error('Incorrect token')
+      return res.status(404).json({error: error.message})
+    }
+
+    res.json('Correct token')
+  }
+
+  static resetPasswordWithToken = async (req: Request, res: Response) => {
+    const { token } = req.params
+    const { password } = req.body
+
+    //Validate token
+    const user = await User.findOne({ where: { token: token } })
+    if (!user) {
+      const error = Error('Incorrect token')
+      return res.status(404).json({error: error.message})
+    }
+
+    // Save the new password
+    user.password = await hashPassword(password)
+    user.token = null
+    await user.save()
+
+    res.json('Password updated successfully')
+  }
 }

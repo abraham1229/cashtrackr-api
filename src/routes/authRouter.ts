@@ -1,6 +1,6 @@
 import { Router } from 'express' 
 import { AuthController } from '../controllers/AuthController'
-import { body } from 'express-validator'
+import { body, param } from 'express-validator'
 import { handleInputErrors } from '../middleware/validation'
 import { limiter } from '../config/limiter'
  
@@ -43,5 +43,20 @@ router.post('/forgot-password',
   AuthController.forgotPassword
 )
 
+router.post('/validate-token',
+  body('token')
+    .notEmpty().isLength({ min: 6, max: 6 }).withMessage('Token is required'),
+  handleInputErrors,
+  AuthController.validateToken
+)
+
+router.post('/reset-password/:token',
+  param('token')
+    .notEmpty().isLength({ min: 6, max: 6 }).withMessage('Token is required'),
+  body('password')
+    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+  handleInputErrors,
+  AuthController.resetPasswordWithToken
+)
 
 export default router
