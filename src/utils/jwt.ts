@@ -6,3 +6,7 @@ export const generateJWT = (id: string) : string => {
   })
   return token
 }
+
+export const decodeJWT = (token: string) : string | jwt.JwtPayload => {
+  return jwt.verify(token,process.env.JWT_SECRET)
+}

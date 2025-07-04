@@ -3,7 +3,8 @@ import User from '../models/User'
 import { checkPassword, hashPassword } from '../utils/auth'
 import { generateToken } from '../utils/token'
 import { AuthEmail } from '../emails/AuthEmail'
-import { generateJWT } from '../utils/jwt'
+import { decodeJWT, generateJWT } from '../utils/jwt'
+import jwt from 'jsonwebtoken'
 
 export class AuthController {
   static createAccount = async (req: Request, res: Response) => { 
@@ -146,5 +147,34 @@ export class AuthController {
     await user.save()
 
     res.json('Password updated successfully')
+  }
+
+  static user = async (req: Request, res: Response) => { 
+    const bearer = req.headers.authorization
+
+    if (!bearer) {
+      const error = Error('No authenticated')
+      return res.status(401).json({error: error.message})
+    }
+
+    const token = bearer.split(' ')[1]
+
+    if (!token) {
+      const error = Error('Invalid token')
+      return res.status(401).json({error: error.message})
+    }
+
+    try {
+      const decoded = decodeJWT(token)
+      if (typeof decoded === 'object' && decoded.id) {
+        const user = await User.findByPk(decoded.id, {
+          attributes: ['id','name','email']
+        })
+        res.json(user)
+      }
+      
+    } catch (error) {
+      res.status(500).json({error: 'Unexpected error'})
+    }
   }
 }
