@@ -48,7 +48,7 @@ export const validateBudgetInput = async (req: Request, res: Response, next: Nex
   next()
 }
 
-export const hasAccess = async (req: Request, res: Response, next: NextFunction) => { 
+export const hasAccess = (req: Request, res: Response, next: NextFunction) => { 
   const { budget, user } = req
 
   if (budget.userId !== user.id) {
