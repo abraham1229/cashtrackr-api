@@ -5,7 +5,8 @@ import Budget from '../../models/Budget'
 
 //Mock the model
 jest.mock('../../models/Budget', () => ({
-  findAll: jest.fn()
+  findAll: jest.fn(),
+  create: jest.fn()
 }))
 
 describe('BudgetController.getAll', () => {
@@ -87,7 +88,72 @@ describe('BudgetController.getAll', () => {
     (Budget.findAll as jest.Mock).mockRejectedValue(new Error)
     await BudgetController.getAll(req, res)
 
+    //Check expected responses
     expect(res.statusCode).toBe(500)
     expect(res._getJSONData()).toStrictEqual({ error: 'Unexpected error' })
+  })
+})
+
+describe('BudgetController.create', () => {
+  it('Should create a new budget and respond with statucode 201', async () => {
+    const mockBudget = {
+      save: jest.fn().mockResolvedValue(true)
+    };
+
+    (Budget.create as jest.Mock).mockResolvedValue(mockBudget);
+
+    //Create req and res
+    const req = createRequest({
+      method: 'POST',
+      url: '/api/budgets', 
+      user: { id: 1 },
+      body: { 
+        name: "Test budget",
+        amount: 1000
+      }
+    })
+    const res = createResponse();
+
+    await BudgetController.create(req, res)
+
+
+    //Check expected response
+    const data = res._getJSONData()
+    expect(res.statusCode).toBe(201)
+    expect(data).toBe('Budget created')
+    expect(mockBudget.save).toHaveBeenCalled()
+    expect(mockBudget.save).toHaveBeenCalledTimes(1)
+    expect(Budget.create).toHaveBeenCalledWith(req.body) 
+  })
+
+  it('Should handle budget creation error', async () => {
+    const mockBudget = {
+      save: jest.fn().mockResolvedValue(true)
+    };
+
+    (Budget.create as jest.Mock).mockRejectedValue(new Error);
+    
+    //Create req and res
+    const req = createRequest({
+      method: 'POST',
+      url: '/api/budgets', 
+      user: { id: 1 },
+      body: { 
+        name: "Test budget",
+        amount: 1000
+      }
+    })
+    const res = createResponse();
+
+    await BudgetController.create(req, res)
+
+
+    //Check expected response
+    const data = res._getJSONData()
+
+    expect(res.statusCode).toBe(500)
+    expect(data).toEqual({ error: 'Unexpected error' })
+    expect(mockBudget.save).not.toHaveBeenCalled()
+    expect(Budget.create).toHaveBeenCalledWith(req.body) 
   })
 })
