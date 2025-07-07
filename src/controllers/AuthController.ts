@@ -31,9 +31,8 @@ export class AuthController {
         token: user.token
       })
 
-      res.json('Account created successfully')
+      res.status(201).json('Account created successfully')
 
-      
     } catch (error) {
       res.status(500).json({error: 'Unexpected error'})
     }
