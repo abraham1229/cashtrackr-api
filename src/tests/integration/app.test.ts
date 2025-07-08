@@ -97,9 +97,25 @@ describe('Authentication - Create Account', () => {
     expect(response.body).not.toHaveProperty('errors')
   })
 
+  it('should return 409 conflict when a user is already registered', async () => {
+
+    const userData = {
+        "name": "Abraham Ortiz",
+        "password": "12345678",
+        "email": "email@email.com"
+      }
+
+    const response = await request(server)
+      .post('/api/auth/create-account')
+      .send(userData)
+    
+    expect(response.statusCode).toBe(409)
+    expect(response.body).toHaveProperty('error')
+    expect(response.body.error).toBe('The email is already in use')
+    expect(response.body).not.toHaveProperty('errors')
+  })
 
   afterAll(async () => {
     await db.close()
   })
-
 })
