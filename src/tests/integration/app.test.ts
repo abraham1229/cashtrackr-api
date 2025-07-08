@@ -1,8 +1,15 @@
 import request from 'supertest'
-import server, { connectDB } from '../../server'
+import server from '../../server'
 import { AuthController } from '../../controllers/AuthController'
+import { connectDB } from '../../server'
+import { db } from '../../config/db'
 
 describe('Authentication - Create Account', () => {
+
+  beforeAll(async () => {
+    await connectDB()
+  })
+
   it('should display validation errors when form is empty', async () => {
     const response = await request(server)
       .post('/api/auth/create-account')
@@ -74,7 +81,7 @@ describe('Authentication - Create Account', () => {
     expect(createAccountMock).not.toHaveBeenCalled()
   })
 
-  it('should return 201 when body is valid', async () => {
+  it('should register a new user successfully when the body is valid', async () => {
 
     const userData = {
         "name": "Abraham Ortiz",
@@ -91,5 +98,8 @@ describe('Authentication - Create Account', () => {
   })
 
 
+  afterAll(async () => {
+    await db.close()
+  })
 
 })
