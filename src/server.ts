@@ -14,6 +14,8 @@ export async function connectDB() {
   }
 }
 
+connectDB()
+
 const app = express()
 
 app.use(morgan('dev'))

@@ -1,14 +1,8 @@
 import request from 'supertest'
 import server from '../../server'
 import { AuthController } from '../../controllers/AuthController'
-import { connectDB } from '../../server'
-import { db } from '../../config/db'
 
 describe('Authentication - Create Account', () => {
-
-  beforeAll(async () => {
-    await connectDB()
-  })
 
   it('should display validation errors when form is empty', async () => {
     const response = await request(server)
@@ -113,9 +107,5 @@ describe('Authentication - Create Account', () => {
     expect(response.body).toHaveProperty('error')
     expect(response.body.error).toBe('The email is already in use')
     expect(response.body).not.toHaveProperty('errors')
-  })
-
-  afterAll(async () => {
-    await db.close()
   })
 })
