@@ -22,7 +22,7 @@ router.post('/create-account',
 
 router.post('/confirm-account',
   body('token')
-    .notEmpty().isLength({min:6, max:6}).withMessage('Token is required'),
+    .isLength({min:6, max:6}).withMessage('Token is required'),
   handleInputErrors,
   AuthController.confirmAccount
 )
