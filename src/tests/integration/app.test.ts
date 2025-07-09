@@ -508,3 +508,36 @@ describe('PUT /api/budgets/:id', () => {
     expect(response.body).toBe('Budget updated successfully')
   })
 })
+
+describe('DELETE /api/budgets/:id', () => {
+
+  beforeAll(async () => {
+    authenticateUser()
+  })
+
+  it('should return 401 when there is not jwt', async () => {
+    const response = await request(server)
+      .delete('/api/budgets/1')
+    
+    expect(response.status).toBe(401)
+    expect(response.body.error).toBe('No authenticated')
+  })
+
+  it('should return 404 when a budget does not exist', async () => {
+    const response = await request(server)
+      .delete('/api/budgets/5000')
+      .auth(jwt, { type: 'bearer' })
+    
+    expect(response.status).toBe(404)
+    expect(response.body.error).toBe('Budget not found')
+  })
+
+  it('should delete a budget and return a success message', async () => {
+    const response = await request(server)
+      .delete('/api/budgets/1')
+      .auth(jwt, { type: 'bearer' })
+    
+    expect(response.status).toBe(200)
+    expect(response.body).toBe('Budget deleted successfully')
+  })
+})
