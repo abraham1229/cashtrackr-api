@@ -285,7 +285,7 @@ describe('Authentication - Login', () => {
     expect(checPasswordMock).toHaveBeenCalledTimes(1)
   })
   
-  it('should return 200 when everything goes good', async () => {
+  it('should return 200 when everything goes good and a JWT', async () => {
 
     const userIdTest = 500
     const jwtTest = 'jwtTest'
@@ -318,4 +318,76 @@ describe('Authentication - Login', () => {
     expect(generateJWTMock).toHaveBeenCalledTimes(1)
     expect(generateJWTMock).toHaveBeenCalledWith(userIdTest)
   })
+})
+
+describe('GET /api/budgets', () => {
+
+  let jwt: string
+
+  beforeAll(() => {
+    jest.restoreAllMocks() //Restore the function to its original implementation
+  })
+
+  beforeAll(async () => {
+    // Get the JWT on before all
+    const response = await request(server)
+      .post('/api/auth/login')
+      .send({
+        email: "email@email.com",
+        password: "12345678"
+      })
+    
+    jwt = response.body
+
+    expect(response.status).toBe(200)
+  })
+  
+  it('should reject unauthenticated acces to budgets without a jwt', async () => {
+    const response = await request(server)
+      .post('/api/budgets')
+      .send({
+        "token":"",
+      })
+    
+    expect(response.status).toBe(401)
+    expect(response.body.error).toBe('No authenticated')
+  })
+  
+  it('should reject incorrect jwt with 401 ', async () => {
+    const response = await request(server)
+      .get('/api/budgets')
+      .auth('not_valid', {type: "bearer"})
+    
+    expect(response.status).toBe(401)
+    expect(response.body.error).toBe('Invalid Token')
+  })
+  
+  it('should allow authenticated users to get budgets', async () => {
+    const response = await request(server)
+      .get('/api/budgets')
+      .auth(jwt, {type: "bearer"})
+    
+    expect(response.status).toBe(200)
+    expect(response.body).toHaveLength(0)
+  })
+})
+
+describe('GET /api/budgets', () => {
+
+  let jwt: string
+
+  beforeAll(async () => {
+    // Get the JWT on before all
+    const response = await request(server)
+      .post('/api/auth/login')
+      .send({
+        email: "email@email.com",
+        password: "12345678"
+      })
+    
+    jwt = response.body
+
+    expect(response.status).toBe(200)
+  })
+
 })

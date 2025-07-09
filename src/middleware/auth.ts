@@ -37,6 +37,6 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       next()
     }
   } catch (error) {
-    res.status(500).json({error: 'Unexpected error'})
+    res.status(401).json({error: 'Invalid Token'})
   }
 }
