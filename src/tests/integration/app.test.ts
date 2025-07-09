@@ -109,3 +109,21 @@ describe('Authentication - Create Account', () => {
     expect(response.body).not.toHaveProperty('errors')
   })
 })
+
+describe('Authentication - Account Confirmation with token', () => {
+
+
+  it('should display error if token is empty or is not valid', async () => {
+    const response = await request(server)
+      .post('/api/auth/confirm-account')
+      .send({
+        token: "not_valid"
+      })
+    
+    expect(response.status).toBe(400)
+    expect(response.body).toHaveProperty('errors')
+    expect(response.body.errors).toHaveLength(1)
+    expect(response.body.errors[0].msg).toBe('Token is required')
+  })
+
+})
