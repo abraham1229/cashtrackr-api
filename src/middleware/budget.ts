@@ -37,12 +37,12 @@ export const validateBudgetExists = async (req: Request, res: Response, next: Ne
 }
 
 export const validateBudgetInput = async (req: Request, res: Response, next: NextFunction) => {
-  await body('name').notEmpty().withMessage('Budget is required.')
+  await body('name').notEmpty().withMessage('Budget is required')
     .run(req)
 
-  await body('amount').notEmpty().withMessage('Amount is required.')
-    .isNumeric().withMessage('Amount must be a number.')
-    .custom(value => value > 0).withMessage('Amount must be greater than zero.')
+  await body('amount').notEmpty().withMessage('Amount is required')
+    .isNumeric().withMessage('Amount must be a number')
+    .custom(value => value > 0).withMessage('Amount must be greater than zero')
     .run(req)
 
   next()
