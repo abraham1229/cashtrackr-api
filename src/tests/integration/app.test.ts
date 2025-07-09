@@ -1,6 +1,9 @@
 import request from 'supertest'
 import server from '../../server'
 import { AuthController } from '../../controllers/AuthController'
+import User from '../../models/User'
+import * as authUtils from '../../utils/auth'
+import * as jwtUtils from '../../utils/jwt'
 
 describe('Authentication - Create Account', () => {
 
@@ -150,5 +153,169 @@ describe('Authentication - Account Confirmation with token', () => {
     expect(response.status).toBe(200)
     expect(response.body).toBe('Account confirmed successfully')
   })
+})
 
+describe('Authentication - Login', () => { 
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('should return validation errors when the form is empty', async () => {
+    const response = await request(server)
+      .post('/api/auth/login')
+      .send({
+        "email":"",
+        "password":""
+      })
+    
+    const loginMock = jest.spyOn(AuthController, 'login')
+    
+    expect(response.status).toBe(400)
+    expect(response.body).toHaveProperty('errors')
+    expect(response.body.errors).toHaveLength(2)
+    expect(response.body.errors[0].msg).toBe('Invalid email')
+    expect(response.body.errors[1].msg).toBe('Password is required')
+    expect(loginMock).not.toHaveBeenCalled()
+  })
+
+  it('should return 400 bad request when the email is invalid', async () => {
+    const response = await request(server)
+      .post('/api/auth/login')
+      .send({
+        "email":"emailNotValid",
+        "password":"password"
+      })
+    
+    const loginMock = jest.spyOn(AuthController, 'login')
+    
+    expect(response.status).toBe(400)
+    expect(response.body).toHaveProperty('errors')
+    expect(response.body.errors).toHaveLength(1)
+    expect(response.body.errors[0].msg).toBe('Invalid email')
+    expect(loginMock).not.toHaveBeenCalled()
+  })
+
+  it('should return 404 when the user does NOT exist', async () => {
+    const response = await request(server)
+      .post('/api/auth/login')
+      .send({
+        "email":"test@test.com",
+        "password":"password"
+      })
+    
+    expect(response.status).toBe(404)
+    expect(response.status).not.toBe(200)
+    expect(response.body).toHaveProperty('error')
+    expect(response.body.error).toBe('User not found')
+  })
+
+  it('should return 403 when the user account is not confirmed', async () => {
+
+    (jest.spyOn(User, 'findOne') as jest.Mock).mockResolvedValue({
+      id: 1,
+      confirmed: false,
+      password: 'hashedPassword',
+      email: 'user_not_confirmed@test.com'
+    })
+
+
+    const response = await request(server)
+      .post('/api/auth/login')
+      .send({
+        "email":"user_not_confirmed@test.com",
+        "password":"password"
+      })
+    
+    expect(response.status).toBe(403)
+    expect(response.status).not.toBe(200)
+    expect(response.body).toHaveProperty('error')
+    expect(response.body.error).toBe('Account is not confirmed')
+  })
+
+  it('should return 403 when the user account is not confirmed', async () => {
+
+    const userData = {
+      name: "Test",
+      email: "user_not_confirmed@test.com",
+      password: "password"
+    }
+
+    //Crate user
+    await request(server).post('/api/auth/create-account').send(userData)
+
+    const response = await request(server)
+      .post('/api/auth/login')
+      .send({
+        "email": userData.email,
+        "password": userData.password
+      })
+    
+    expect(response.status).toBe(403)
+    expect(response.status).not.toBe(200)
+    expect(response.body).toHaveProperty('error')
+    expect(response.body.error).toBe('Account is not confirmed')
+  })
+
+  
+  it('should return 401 when the user password is incorrect', async () => {
+
+    const findOneMock = (jest.spyOn(User, 'findOne') as jest.Mock).mockResolvedValue({
+      id: 1,
+      confirmed: true,
+      password: 'hashedPassword',
+      email: 'user_incorrect_password@test.com'
+    })
+
+    const checPasswordMock = jest.spyOn(authUtils, 'checkPassword').mockResolvedValue(false)
+
+
+    const response = await request(server)
+      .post('/api/auth/login')
+      .send({
+        "email":"user_incorrect_password@test.com",
+        "password":"wrong_password"
+      })
+    
+    expect(response.status).toBe(401)
+    expect(response.status).not.toBe(200)
+    expect(response.body).toHaveProperty('error')
+    expect(response.body.error).toBe('Incorrect password')
+    expect(findOneMock).toHaveBeenCalledTimes(1)
+    expect(checPasswordMock).toHaveBeenCalledTimes(1)
+  })
+  
+  it('should return 200 when everything goes good', async () => {
+
+    const userIdTest = 500
+    const jwtTest = 'jwtTest'
+    const hashedPasswordTest = 'hashedPassword'
+    const bodyPasswordTest = 'correctPassword'
+
+    const findOneMock = (jest.spyOn(User, 'findOne') as jest.Mock).mockResolvedValue({
+      id: userIdTest,
+      confirmed: true,
+      password: hashedPasswordTest,
+      email: 'user_incorrect_password@test.com'
+    })
+
+    const checPasswordMock = jest.spyOn(authUtils, 'checkPassword').mockResolvedValue(true)
+
+    const generateJWTMock = jest.spyOn(jwtUtils, 'generateJWT').mockReturnValue(jwtTest)
+
+    const response = await request(server)
+      .post('/api/auth/login')
+      .send({
+        "email":"user_incorrect_password@test.com",
+        "password":bodyPasswordTest
+      })
+    
+    expect(response.status).toBe(200)
+    expect(response.body).toBe(jwtTest)
+    expect(findOneMock).toHaveBeenCalledTimes(1)
+    expect(checPasswordMock).toHaveBeenCalledTimes(1)
+    expect(checPasswordMock).toHaveBeenCalledWith(bodyPasswordTest, hashedPasswordTest)
+    expect(generateJWTMock).toHaveBeenCalledTimes(1)
+    expect(generateJWTMock).toHaveBeenCalledWith(userIdTest)
+  })
 })
