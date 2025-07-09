@@ -320,9 +320,23 @@ describe('Authentication - Login', () => {
   })
 })
 
-describe('GET /api/budgets', () => {
+//Authenticate
+let jwt: string
+async function authenticateUser() {
+  // Get the JWT on before all
+  const response = await request(server)
+    .post('/api/auth/login')
+    .send({
+      email: "email@email.com",
+      password: "12345678"
+    })
+  
+  jwt = response.body
 
-  let jwt: string
+  expect(response.status).toBe(200)
+}
+
+describe('GET /api/budgets', () => {
 
   beforeAll(() => {
     jest.restoreAllMocks() //Restore the function to its original implementation
@@ -330,24 +344,12 @@ describe('GET /api/budgets', () => {
 
   beforeAll(async () => {
     // Get the JWT on before all
-    const response = await request(server)
-      .post('/api/auth/login')
-      .send({
-        email: "email@email.com",
-        password: "12345678"
-      })
-    
-    jwt = response.body
-
-    expect(response.status).toBe(200)
+    await authenticateUser()
   })
   
   it('should reject unauthenticated acces to budgets without a jwt', async () => {
     const response = await request(server)
-      .post('/api/budgets')
-      .send({
-        "token":"",
-      })
+      .get('/api/budgets')
     
     expect(response.status).toBe(401)
     expect(response.body.error).toBe('No authenticated')
@@ -372,22 +374,48 @@ describe('GET /api/budgets', () => {
   })
 })
 
-describe('GET /api/budgets', () => {
-
-  let jwt: string
+describe('POST /api/budgets', () => {
 
   beforeAll(async () => {
-    // Get the JWT on before all
-    const response = await request(server)
-      .post('/api/auth/login')
-      .send({
-        email: "email@email.com",
-        password: "12345678"
-      })
-    
-    jwt = response.body
-
-    expect(response.status).toBe(200)
+    authenticateUser()
   })
 
+  it('should reject creating a budget without a jwt', async () => {
+    const response = await request(server)
+      .post('/api/budgets')
+    
+    expect(response.status).toBe(401)
+    expect(response.body.error).toBe('No authenticated')
+  })
+
+  it('should reject creating a budget with incorrect body', async () => {
+    const response = await request(server)
+      .post('/api/budgets')
+      .auth(jwt, {type: "bearer"})
+      .send({
+        name: "",
+        amount: ""
+      })
+    
+    console.log(response.body.errors)
+    expect(response.status).toBe(400)
+    expect(response.body.errors[0].msg).toBe('Budget is required')
+    expect(response.body.errors[1].msg).toBe('Amount is required')
+    expect(response.body.errors[2].msg).toBe('Amount must be a number')
+    expect(response.body.errors[3].msg).toBe('Amount must be greater than zero')
+    expect(response.body.errors).toHaveLength(4)
+  })
+
+  it('should create a new budget and return a success message', async () => {
+    const response = await request(server)
+      .post('/api/budgets')
+      .auth(jwt, {type: "bearer"})
+      .send({
+        name: "Budget test",
+        amount: "5000"
+      })
+    
+    expect(response.status).toBe(201)
+    expect(response.body).toBe('Budget created')
+  })
 })
