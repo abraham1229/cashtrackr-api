@@ -11,8 +11,8 @@ declare global {
 }
 
 export const validateBudgetId = async (req: Request, res: Response, next: NextFunction) => {
-  await param('budgetId').isInt().withMessage('ID must be an integer')
-    .custom(value => value > 0).withMessage('ID must be greater than zero')
+  await param('budgetId').isInt().withMessage('ID must be an integer').bail()
+    .custom(value => value > 0).withMessage('ID must be greater than zero').bail()
     .run(req)
 
   next()

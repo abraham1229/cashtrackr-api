@@ -397,7 +397,6 @@ describe('POST /api/budgets', () => {
         amount: ""
       })
     
-    console.log(response.body.errors)
     expect(response.status).toBe(400)
     expect(response.body.errors[0].msg).toBe('Budget is required')
     expect(response.body.errors[1].msg).toBe('Amount is required')
@@ -417,5 +416,56 @@ describe('POST /api/budgets', () => {
     
     expect(response.status).toBe(201)
     expect(response.body).toBe('Budget created')
+  })
+})
+
+describe('GET /api/budgets/:id', () => {
+
+  beforeAll(async () => {
+    authenticateUser()
+  })
+
+  it('should return 401 when there is not jwt', async () => {
+    const response = await request(server)
+      .get('/api/budgets/1')
+    
+    expect(response.status).toBe(401)
+    expect(response.body.error).toBe('No authenticated')
+  })
+
+  it('should return 400 when :id is not valid', async () => {
+    const response = await request(server)
+      .get('/api/budgets/not_valid')
+      .auth(jwt, {type: "bearer"})
+    
+    expect(response.status).toBe(400)
+    expect(response.body.errors).toBeDefined()
+    expect(response.body.errors).toHaveLength(1)
+    expect(response.body.errors[0].msg).toBe('ID must be an integer')
+    expect(response.status).not.toBe(401)
+    expect(response.body.error).not.toBe('No authenticated')
+  })
+
+  it('should return 404 when the budget id, does not exist', async () => {
+    const response = await request(server)
+      .get('/api/budgets/900')
+      .auth(jwt, {type: "bearer"})
+    
+    expect(response.status).toBe(404)
+    expect(response.body.error).toBeDefined()
+    expect(response.body.error).toBe('Budget not found')
+    expect(response.status).not.toBe(401)
+    expect(response.status).not.toBe(400)
+  })
+
+  it('should return the budget if is authorized ', async () => {
+    const response = await request(server)
+      .get('/api/budgets/1')
+      .auth(jwt, {type: "bearer"})
+    
+    expect(response.status).toBe(200)
+    expect(response.status).not.toBe(401)
+    expect(response.status).not.toBe(400)
+    expect(response.status).not.toBe(404)
   })
 })
