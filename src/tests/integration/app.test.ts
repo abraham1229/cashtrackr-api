@@ -469,3 +469,42 @@ describe('GET /api/budgets/:id', () => {
     expect(response.status).not.toBe(404)
   })
 })
+
+describe('PUT /api/budgets/:id', () => {
+
+  beforeAll(async () => {
+    authenticateUser()
+  })
+
+  it('should return 401 when there is not jwt', async () => {
+    const response = await request(server)
+      .put('/api/budgets/1')
+    
+    expect(response.status).toBe(401)
+    expect(response.body.error).toBe('No authenticated')
+  })
+
+  it('should display validation errors if the form is empty', async () => {
+    const response = await request(server)
+      .put('/api/budgets/1')
+      .auth(jwt, { type: 'bearer' })
+      .send({})
+    
+    expect(response.status).toBe(400)
+    expect(response.body.errors).toBeTruthy()
+    expect(response.body.errors).toHaveLength(4)
+  })
+
+  it('should update by id and returna success message', async () => {
+    const response = await request(server)
+      .put('/api/budgets/1')
+      .auth(jwt, { type: 'bearer' })
+      .send({
+        name: 'Updated budget',
+        amount: '2000'
+      })
+    
+    expect(response.status).toBe(200)
+    expect(response.body).toBe('Budget updated successfully')
+  })
+})
