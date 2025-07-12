@@ -14,7 +14,7 @@ export class AuthEmail {
       subject: 'CashTrackr - Confirm your account',
       html: `<p>Hi ${user.name}, you have created you CashTrackr account, you are almost done!</p>
         <p>Follow the link below:</p>
-        <a href="#">Confirm account</a>
+      <a href="${process.env.FRONTEND_URL}/auth/confirm-account">Confirm account</a>
         <p> Enter the code: <b>${user.token}</b><p>`
     })
     // console.log('Mensaje enviado',email.messageId)
@@ -27,7 +27,7 @@ export class AuthEmail {
       subject: 'CashTrackr - Reset token',
       html: `<p>Hi ${user.name}, you have requested to reset your password.</p>
         <p>Follow the link below:</p>
-        <a href="#">Reset password</a>
+        <a href="${process.env.FRONTEND_URL}/auth/new-password">Reset password</a>
         <p> Enter the code: <b>${user.token}</b><p>`
     })
     // console.log('Mensaje enviado',email.messageId)
