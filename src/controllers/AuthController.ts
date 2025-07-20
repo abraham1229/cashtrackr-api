@@ -165,7 +165,7 @@ export class AuthController {
 
     const isPasswordCorrect = await checkPassword(current_password, password)
     if (!isPasswordCorrect) {
-      const error = new Error('Incorrect actual password')
+      const error = new Error('Current password is incorrect')
       return res.status(401).json({error: error.message})
     }
 
