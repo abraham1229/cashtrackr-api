@@ -1,10 +1,10 @@
-import { Router } from 'express' 
+import { Router } from 'express'
 import { AuthController } from '../controllers/AuthController'
 import { body, param } from 'express-validator'
 import { handleInputErrors } from '../middleware/validation'
 import { limiter } from '../config/limiter'
 import { authenticate } from '../middleware/auth'
- 
+
 const router = Router()
 
 router.use(limiter) //use groups all the request types
@@ -22,12 +22,12 @@ router.post('/create-account',
 
 router.post('/confirm-account',
   body('token')
-    .isLength({min:6, max:6}).withMessage('Token is required'),
+    .isLength({ min: 6, max: 6 }).withMessage('Token is required'),
   handleInputErrors,
   AuthController.confirmAccount
 )
 
-router.post('/login', 
+router.post('/login',
   body('email')
     .isEmail().withMessage('Invalid email'),
   body('password')
@@ -62,6 +62,16 @@ router.post('/reset-password/:token',
 router.get('/user',
   authenticate,
   AuthController.user
+)
+
+router.put('/user',
+  authenticate,
+  body('name')
+    .notEmpty().withMessage('Name is required'),
+  body('email')
+    .isEmail().withMessage('Invalid email'),
+  handleInputErrors,
+  AuthController.updateUser
 )
 
 router.post('/update-password',

@@ -157,6 +157,26 @@ export class AuthController {
     res.json(req.user)
   }
 
+  static updateUser = async (req: Request, res: Response) => { 
+    const { email } = req.body
+
+    const emailExists = await User.findOne({ where: { email: email } })
+    
+    if (emailExists) {
+      const error = new Error('This email is already in use')
+      return res.status(409).json({error: error.message})
+    }
+
+    const user = await User.findByPk(req.user.id)
+
+    user.name = req.body.name
+    user.email = req.body.email
+
+    await user.save()
+
+    return res.json('User updated successfully')
+  }
+
   static updatePassword = async (req: Request, res: Response) => { 
     const { current_password, new_password } = req.body
     const { id } = req.user
