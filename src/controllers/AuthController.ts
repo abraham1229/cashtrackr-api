@@ -37,7 +37,7 @@ export class AuthController {
         token: user.token
       })
 
-      res.status(201).json('Account created successfully')
+      res.status(201).json("We've sent a confirmation email. Check your inbox (and spam folder just in case) to activate your account.")
 
     } catch (error) {
       res.status(500).json({ error: 'Unexpected error' })
