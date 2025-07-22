@@ -1,4 +1,5 @@
-import { transport } from "../config/nodemailer"
+// import { transport } from "../config/nodemailer"
+import sgMail from "../config/sendgrid"
 
 type EmailType = {
   name: string
@@ -8,28 +9,27 @@ type EmailType = {
 
 export class AuthEmail {
   static sendConfirmationEmail = async (user: EmailType) => {
-    const email = await transport.sendMail({
-      from: 'CashTrackr <demomailtrap.com>',
+    const msg = {
       to: user.email,
+      from: 'CashTrackr <abrahamortizcastro1229@gmail.com>',
       subject: 'CashTrackr - Confirm your account',
-      html: `<p>Hi ${user.name}, you have created you CashTrackr account, you are almost done!</p>
+      html: `<p>Hi ${user.name}, you have created your CashTrackr account. You are almost done!</p>
         <p>Follow the link below:</p>
-      <a href="${process.env.FRONTEND_URL}/auth/confirm-account">Confirm account</a>
-        <p> Enter the code: <b>${user.token}</b><p>`
-    })
-    // console.log('Mensaje enviado',email.messageId)
+        <a href="${process.env.FRONTEND_URL}/auth/confirm-account">Confirm account</a>
+        <p> Enter the code: <b>${user.token}</b><p>`,
+    }
+
+    await sgMail.send(msg)
   }
 
   static sendPasswordResetToken = async (user: EmailType) => {
-    const email = await transport.sendMail({
-      from: 'CashTrackr <demomailtrap.com>',
+    const msg = {
       to: user.email,
-      subject: 'CashTrackr - Reset token',
-      html: `<p>Hi ${user.name}, you have requested to reset your password.</p>
-        <p>Follow the link below:</p>
-        <a href="${process.env.FRONTEND_URL}/auth/new-password">Reset password</a>
-        <p> Enter the code: <b>${user.token}</b><p>`
-    })
-    // console.log('Mensaje enviado',email.messageId)
+      from: 'CashTrackr <abrahamortizcastro1229@gmail.com>',
+      subject: 'CashTrackr - Reset your password',
+      html: `<p>Hi ${user.name}, here is your reset code: <b>${user.token}</b></p>`,
+    }
+
+    await sgMail.send(msg)
   }
 }
